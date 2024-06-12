@@ -6,7 +6,7 @@ import eipy.ei as e
 import tensorflow as tf
 from keras.callbacks import EarlyStopping # type: ignore
 from keras.models import Sequential # type: ignore
-from keras.layers import LSTM,Dense, Bidirectional, GRU, Dropout # type: ignore
+from keras.layers import LSTM,Dense, Bidirectional, GRU, Dropout, SimpleRNN, BatchNormalization # type: ignore
 from keras.regularizers import l2 # type: ignore
 import matplotlib.pyplot as plt
 from keras import losses
@@ -109,26 +109,25 @@ def reformat_data(dfs):
     return tensor_3d, labels_across_time
 
 
-# PPAD method that takes the follwing parametres:
-# cell: it represents the RNN cell will be used {'GRU', 'biGRU', 'LSTM', 'biLSTM'}
-# drout: it represents the drop out rate will be used {0, 0.1, 0.2, 0.3, 0.4, 0.5}
-# L2: it represents the L2 regularization {0.1, 0.001, 0.00001, 0.0000001}
-# ftp: it represents future time point to predict in PPAD its 1
 
-def build_RNN(units, cell, drout, L2, regularizing_layer="dropout"):
+def build_RNN(units, cell, drout, L2, deep=True, reg_layer='batchnorm', activation='tanh', gamma=0):
     model = Sequential()
     
     params_dict_1 = {'units': units,
                      'activity_regularizer': l2(L2),
-                     'return_sequences': True,
-                     'activation': 'relu'}
+                     'dropout': drout,
+                     'recurrent_dropout': drout,
+                     'return_sequences': True}
     params_dict_2 = {'units': units // 2,
                      'activity_regularizer': l2(L2),
-                     'return_sequences': False,
-                     'activation': 'relu'}
+                     'dropout': drout,
+                     'recurrent_dropout': drout,
+                     'return_sequences': True}
     
 
-    if cell == 'biGRU':
+    if cell =='RNN':
+        model.add(SimpleRNN(**params_dict_1))
+    elif cell == 'biGRU':
         model.add(Bidirectional(GRU(**params_dict_1)))
     elif cell == 'biLSTM':
         model.add(Bidirectional(LSTM(**params_dict_1)))
@@ -137,26 +136,41 @@ def build_RNN(units, cell, drout, L2, regularizing_layer="dropout"):
     elif cell == 'LSTM':
         model.add(LSTM(**params_dict_1))
     
-    if regularizing_layer=="dropout":
-        model.add(Dropout(drout))
-
-    if cell == 'biGRU':
-        model.add(Bidirectional(GRU(**params_dict_2)))
-    elif cell == 'biLSTM':
-        model.add(Bidirectional(LSTM(**params_dict_2)))
-    elif cell == 'GRU':
-        model.add(GRU(**params_dict_2))
-    elif cell == 'LSTM':
-        model.add(LSTM(**params_dict_2))
     
-    if regularizing_layer=="dropout":
+    if deep:
         model.add(Dropout(drout))
-
+        if reg_layer=="batchnorm":
+            model.add(BatchNormalization())
+        
+        if cell == 'RNN':
+            model.add(SimpleRNN(**params_dict_2))
+        if cell == 'biGRU':
+            model.add(Bidirectional(GRU(**params_dict_2)))
+        elif cell == 'biLSTM':
+            model.add(Bidirectional(LSTM(**params_dict_2)))
+        elif cell == 'GRU':
+            model.add(GRU(**params_dict_2))
+        elif cell == 'LSTM':
+            model.add(LSTM(**params_dict_2))
+        
+    # model.add(Dropout(drout))
+    # if reg_layer=="batchnorm":
+    #     model.add(BatchNormalization())
+    
     # MLP Classification model    
-    model.add(Dense(units // 2 , activation='relu'))
-    model.add(Dense(3, activation='softmax'))
+    model.add(Dense(units // 2 , activation=activation))
+    model.add(Dropout(drout))
+    if reg_layer=="batchnorm":
+        model.add(BatchNormalization())        
+    
+    model.add(Dense(units // 4  , activation=activation))
+    model.add(Dropout(drout))
+    if reg_layer=="batchnorm":
+        model.add(BatchNormalization())
 
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
+    model.add(Dense(3, activation='softmax'))
+    
+    model.compile(loss=occ_loss(gamma=gamma), optimizer='adam')
     return model
 
 # find the fmax of every class
