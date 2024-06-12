@@ -1,36 +1,19 @@
-|Tests|_ |ReadTheDocs|_ |PythonVersion|_ |Black|_ |License|_
+# Longitudinal Ensemble Integration
 
-.. |Tests| image:: https://github.com/GauravPandeyLab/eipy/actions/workflows/tests.yml/badge.svg
-.. _Tests: https://github.com/GauravPandeyLab/eipy/actions/workflows/tests.yml
+## Overview
+This repository contains the development and implementation of Longitudinal EI, a time-series and multiclass extension of the Ensemble Integration Algorithm.
+Here, LEI was used for early diagnosis trajectory prediction on ADNI patients via TADPOLE.
 
-.. |ReadTheDocs| image:: https://readthedocs.org/projects/eipy/badge/?version=latest
-.. _ReadTheDocs: https://eipy.readthedocs.io/en/latest/
+## Novel Algorithm
+A new algorithm has been developed to address longitudinal forecasting for multi-modal patient data.
 
-.. |PythonVersion| image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue
-.. _PythonVersion: https://github.com/GauravPandeyLab/eipy
+## Implementation
+The repository includes a comprehensive implementation of LEI on TADPOLE. The implementation demonstrates the effectiveness and efficiency of the algorithm as well as its interpretation.
 
-.. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-.. _Black: https://github.com/psf/black
-
-.. |License| image:: https://img.shields.io/badge/License-GPLv3-blue
-.. _License: https://github.com/GauravPandeyLab/eipy/blob/main/COPYING
-
-
-``eipy``: Ensemble Integration in Python
-========================================
-
-``eipy`` is a Python module for developing multi-modal, heterogeneous ensemble classifiers.
-A key feature of ``eipy`` is its built-in nested cross-validation approach, allowing for a fair comparison of a 
-collection of user-defined meta algorithms. 
-
-Documentation including tutorials are available at `https://eipy.readthedocs.io/en/latest/ <https://eipy.readthedocs.io/en/latest/>`_.
-
-Installation
-------------
-
-Create a virtual environment and install with pip:
-
-``pip install ensemble-integration``
+## Repository Structure
+- `eipy/`: Contains the source code for LEI and its implementation.
+- `tadpole_data/`: Contains the dataset used for the implementation as well as the data preparation pipeline code.
+- `LEI_implement/`: Contains the execution of the LEI algorithm on the data
 
 Citation
 --------
