@@ -14,10 +14,13 @@ class ThreshMax:
         if thresh == None:
             thresh=self.tmax
 
-        if y_pred[self.thresh_class] > thresh:
-            return self.thresh_class
+        if thresh == 'argmax':
+            return np.argmax(y_pred)
         else:
-            y_pred[self.thresh_class] = 0 
+            if y_pred[self.thresh_class] > thresh:
+                return self.thresh_class
+            else:
+                y_pred[self.thresh_class] = 0 
             return np.argmax(y_pred)
 
     def find_tmax(self, y_preds, y_trues):
@@ -26,7 +29,7 @@ class ThreshMax:
             fmax = f1_score(y_trues, y_decision_argmax, average='macro')
         else:
             fmax = f1_score(y_trues, y_decision_argmax, average=None)[self.class_to_optimize]
-        tmax = 0
+        tmax = 'argmax'
         for t in np.unique(np.array(y_preds)[:,self.thresh_class]):
             y_decision = [self.compute_threshmax(y,thresh=t) for y in y_preds]
             if self.class_to_optimize == 'avg':
